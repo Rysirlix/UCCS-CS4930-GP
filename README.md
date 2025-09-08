@@ -7,3 +7,7 @@
 *********************
 
 
+## Project Plan
+
+- **Parameters**:
+  - `origin`: The starting location (e.g., `CSU`).
