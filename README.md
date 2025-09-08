@@ -9,5 +9,11 @@
 
 ## Project Plan
 
-- **Parameters**:
-  - `origin`: The starting location (e.g., `CSU`).
+- **Task List**:
+  - `blank`: ********.
+- **Task Assignment**:
+  - `blank`: ********.
+- **Timeline**:
+  - `blank`: ********.
+- **Accountability plan**:
+  - `blank`: ********.
