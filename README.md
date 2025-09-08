@@ -11,8 +11,10 @@
 
 - **Task List**:
   - `Repo + Scope`: ********.
-- **Task Assignment**:
   - `Architecture & Threat Model`: ********.
+- **Task Assignment**:
+  - `Reese N.`: Example-(ML & Backend):.
+  - `Maxwell H.`:(blank):.
 - **Timeline**:
   - `blank`: ********.
 - **Accountability plan**:
