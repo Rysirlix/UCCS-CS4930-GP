@@ -30,8 +30,7 @@
     - Nov 3–Nov 10: Task 10
     - Nov 10–Nov 24: Task 12
     - Nov 24–Dec 5: Task 13
-
-Dec 5–Dec 12: Task 14
+    - Dec 5–Dec 12: Task 14
 - **Accountability plan**:
   - `blank`: ********
 
