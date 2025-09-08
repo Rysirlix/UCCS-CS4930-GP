@@ -10,9 +10,9 @@
 ## Project Plan
 
 - **Task List**:
-  - `blank`: ********.
+  - `Repo + Scope`: ********.
 - **Task Assignment**:
-  - `blank`: ********.
+  - `Architecture & Threat Model`: ********.
 - **Timeline**:
   - `blank`: ********.
 - **Accountability plan**:
