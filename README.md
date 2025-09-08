@@ -17,3 +17,9 @@
   - `blank`: ********.
 - **Accountability plan**:
   - `blank`: ********.
+
+## Gantt Chart
+
+**************
+
+###Project Management Notes
