@@ -32,7 +32,7 @@
     - Nov 24–Dec 5: Task 13
     - Dec 5–Dec 12: Task 14
 - **Accountability plan**:
-  - `blank`: ********
+  - `Weekly check-ins`: 30–45 min, status + blockers.
 
 ## Gantt Chart
 
