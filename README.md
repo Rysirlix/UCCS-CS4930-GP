@@ -11,14 +11,14 @@
 
 - **Task List**:
   - `Repo + Scope`: ********.
-  - `Architecture & Threat Model`: ********.
+  - `Architecture & Threat Model`: ********
 - **Task Assignment**:
-  - `Reese N.`: Example-(ML & Backend):.
-  - `Maxwell H.`:(blank):.
+  - `Reese N.`: Example-(ML & Backend)
+  - `Maxwell H.`:(blank)
 - **Timeline**:
-  - `blank`: ********.
+  - `blank`: ********
 - **Accountability plan**:
-  - `blank`: ********.
+  - `blank`: ********
 
 ## Gantt Chart
 
