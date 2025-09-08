@@ -16,7 +16,7 @@
   - `Reese N.`: Example-(ML & Backend)
   - `Maxwell H.`:(blank)
 - **Timeline**:
-  - `Dates`:
+  - `Example Dates`:
     - Sep 8–12: Task 1
     - Sep 8–15: Task 2
     - Sep 15–29: Task 3
