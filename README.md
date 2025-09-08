@@ -10,7 +10,8 @@
 ## Project Plan
 
 - **Task List**:
-  - `Repo + Scope`: ********.
+  - `Repo + Scope`: Create repo structure, contributor guide, code of conduct
+  - Define ethics/scope.
   - `Architecture & Threat Model`: ********
 - **Task Assignment**:
   - `Reese N.`: Example-(ML & Backend)
