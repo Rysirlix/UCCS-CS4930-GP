@@ -78,8 +78,8 @@ If time permits, we may add extended features such as:
 
 ### Resources
 
-Weekly report File
-Project brief File
-Brainstorming session File
-Research File
-Marketing assets File
+- `Weekly report File`
+- `Project brief File`
+- `Brainstorming session File`
+- `Research File`
+- `Marketing assets File`
