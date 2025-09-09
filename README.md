@@ -41,19 +41,19 @@ We aim to build a cookie and consent auditor for websites. Users will input a we
 - **Timeline**:
   - `Example Dates`:
     - Week 1-2:
-      - Research cookie auditing methods, finalize tech stack
+      Research cookie auditing methods, finalize tech stack
     - Week 3-4:
-      - Build cookie scanner prototype (fetch
+      Build cookie scanner prototype (fetch
     - Week 5:
-      - Extended scanner (session vs persistent cookies, tracker detection basic)
+      Extended scanner (session vs persistent cookies, tracker detection basic)
     - Week 6:
-      - Report generator (CSV output first, then HTML/PDF)
+      Report generator (CSV output first, then HTML/PDF)
     - Week 7:
-      - Flask interface prototype (URL input, display raw cookie data)
+      Flask interface prototype (URL input, display raw cookie data)
     - Week 8-9:
-      - Privacy scoring system: define criteria + implement logic
+      Privacy scoring system: define criteria + implement logic
     - Week 10:
-      - Integration: scanner + scoring + reporting + Flask
+      Integration: scanner + scoring + reporting + Flask
     - Week 11:
       Testing with mult websites (social, e-commerce, news, etc.) adjust scoring
     - Week 12:
