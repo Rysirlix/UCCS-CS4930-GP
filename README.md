@@ -62,6 +62,8 @@ We aim to build a cookie and consent auditor for websites. Users will input a we
       - Documentation: user guide, technical write-up
     - Week 14:
       - Final polish: prepare slides/presentation, last-minute fixes
+    - `OpenAI` - Requests GPT 4o to estimate airport security queue time for a flight
+      - Swagger Documentation for OpenAI integration endpoints can be viewed on app route /api/openai/swagger/ 
 
 - **Accountability plan**:
   - `Weekly check-ins`: 30–45 min, status + blockers.
