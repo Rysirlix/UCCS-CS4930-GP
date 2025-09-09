@@ -40,20 +40,18 @@ We aim to build a cookie and consent auditor for websites. Users will input a we
 
 - **Timeline**:
   - `Example Dates`:
-    - Sep 8–12: Task 1
-    - Sep 8–15: Task 2
-    - Sep 15–29: Task 3
-    - Sep 22–Oct 6: Task 4
-    - Sep 29–Oct 13: Task 5
-    - Oct 6–13: Task 7
-    - Oct 6–20: Task 6
-    - Oct 13–27: Task 8
-    - Sep 15–Oct 1: Task 9
-    - Oct 27–Nov 10: Task 11
-    - Nov 3–Nov 10: Task 10
-    - Nov 10–Nov 24: Task 12
-    - Nov 24–Dec 5: Task 13
-    - Dec 5–Dec 12: Task 14
+    - Week 1-2: Research cookie auditing methods, finalize tech stack
+    - Week 3-4: Build cookie scanner prototype (fetch
+    - Week 5: Extended scanner (session vs persistent cookies, tracker detection basic)
+    - Week 6: Report generator (CSV output first, then HTML/PDF)
+    - Week 7: Flask interface prototype (URL input, display raw cookie data)
+    - Week 8-9: Privacy scoring system: define criteria + implement logic
+    - Week 10: Integration: scanner + scoring + reporting + Flask
+    - Week 11: Testing with mult websites (social, e-commerce, news, etc.) adjust scoring
+    - Week 12: Buffer week: bug fixes, performance tweaks, optional features (crawling, auto-labeling)
+    - Week 13: Documentation: user guide, technical write-up
+    - Week 14: Final polish: prepare slides/presentation, last-minute fixes
+
 - **Accountability plan**:
   - `Weekly check-ins`: 30–45 min, status + blockers.
 
