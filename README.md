@@ -75,3 +75,11 @@ If time permits, we may add extended features such as:
   - Crawling multiple pages
   - Automatically labeling cookie types (analytics, advertising, functional)
   - Providing explanations and notes on privacy scoring
+
+### Resources
+
+Weekly report File
+Project brief File
+Brainstorming session File
+Research File
+Marketing assets File
