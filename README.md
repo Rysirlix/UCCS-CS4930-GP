@@ -1,5 +1,4 @@
 # Kickoff
-
 *****************
 We aim to build a cookie and consent auditor for websites. Users will input a website URL, and the application/tool will scan the site to identify cookies, track their duration, and determine which ones may serve tracking or advertising purposes. The tool will generate a report (HTML, PDF, or CSV) that lists cookies, provides metadata, and assigns a basic privacy score.
 
@@ -40,5 +39,8 @@ We aim to build a cookie and consent auditor for websites. Users will input a we
 **************
 
 ### Project Management Notes:
-
 *****************
+If time permits, we may add extended features such as:
+  - Crawling multiple pages
+  - Automatically labeling cookie types (analytics, advertising, functional)
+  - Providing explanations and notes on privacy scoring
