@@ -55,15 +55,13 @@ We aim to build a cookie and consent auditor for websites. Users will input a we
     - Week 10:
       - Integration: scanner + scoring + reporting + Flask
     - Week 11:
-      - Testing with mult websites (social, e-commerce, news, etc.) adjust scoring
+      Testing with mult websites (social, e-commerce, news, etc.) adjust scoring
     - Week 12:
-      - Buffer week: bug fixes, performance tweaks, optional features (crawling, auto-labeling)
+      Buffer week: bug fixes, performance tweaks, optional features (crawling, auto-labeling)
     - Week 13:
-      - Documentation: user guide, technical write-up
+      Documentation: user guide, technical write-up
     - Week 14:
-      - Final polish: prepare slides/presentation, last-minute fixes
-    - `OpenAI` - Requests GPT 4o to estimate airport security queue time for a flight
-      - Swagger Documentation for OpenAI integration endpoints can be viewed on app route /api/openai/swagger/ 
+      Final polish: prepare slides/presentation, last-minute fixes
 
 - **Accountability plan**:
   - `Weekly check-ins`: 30–45 min, status + blockers.
