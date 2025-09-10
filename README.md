@@ -67,7 +67,8 @@ We aim to build a cookie and consent auditor for websites. Users will input a we
 
 ## Gantt Chart
 
-**************
+<img width="1116" height="512" alt="image" src="https://github.com/user-attachments/assets/cde4afd5-480b-4d8f-94ee-125760ead9c4" />
+
 
 ### Project Management Notes:
 
