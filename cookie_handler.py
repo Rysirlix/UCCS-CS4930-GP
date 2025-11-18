@@ -1,144 +1,189 @@
-import undetected_chromedriver as uc
+#!/usr/bin/env python3
+"""
+cookie_handler.py
+
+Command-line interface for extracting cookies and web storage using extractor.py.
+
+Examples
+--------
+Basic usage (headless, 8s wait):
+
+    python cookie_handler.py https://www.amazon.com
+
+Specify wait time and output file:
+
+    python cookie_handler.py https://example.com -w 12 -o example_storage.json
+
+Show the browser window (non-headless):
+
+    python cookie_handler.py https://example.com --no-headless
+
+Mask values in console output (better for demos / privacy):
+
+    python cookie_handler.py https://example.com --mask-values
+"""
+
+import argparse
 import json
-import time
+import sys
+from typing import Any, Dict
 
-# Install: pip install undetected-chromedriver
+from extractor import extract_cookies_and_storage
 
-print("=== Complete Cookie & Storage Analysis for Amazon ===\n")
 
-try:
-    print("Starting Chrome browser...")
-    
-    options = uc.ChromeOptions()
-    options.add_argument('--headless=new')  # Run without showing browser
-    options.add_argument('--disable-gpu')
-    options.add_argument('--no-sandbox')
-    
-    driver = uc.Chrome(options=options, version_main=142)
-    print("✓ Browser started successfully\n")
-    
-    # Navigate to Amazon
-    amazon_url = "https://www.amazon.com"
-    print(f"Navigating to {amazon_url}...")
-    driver.get(amazon_url)
-    print("✓ Page loaded\n")
-    
-    # Wait for page and let it settle
-    time.sleep(8)
-    
-    print("Current URL:", driver.current_url)
-    print("\n" + "="*70)
-    
-    # 1. Get HTTP Cookies
-    print("\n1. HTTP COOKIES (from Set-Cookie headers)")
-    print("-"*70)
-    cookies = driver.get_cookies()
-    print(f"Found: {len(cookies)} cookies\n")
-    
-    cookie_data = {}
-    for cookie in cookies:
-        name = cookie['name']
-        cookie_data[name] = cookie
-        print(f"  • {name}")
-    
-    # 2. Get localStorage
-    print("\n" + "="*70)
-    print("2. LOCAL STORAGE")
-    print("-"*70)
-    try:
-        local_storage = driver.execute_script("""
-            let items = {};
-            for (let i = 0; i < localStorage.length; i++) {
-                let key = localStorage.key(i);
-                items[key] = localStorage.getItem(key);
-            }
-            return items;
-        """)
-        print(f"Found: {len(local_storage)} items\n")
-        for key in local_storage.keys():
-            print(f"  • {key}")
-    except Exception as e:
-        print(f"Could not access localStorage: {e}")
-        local_storage = {}
-    
-    # 3. Get sessionStorage
-    print("\n" + "="*70)
-    print("3. SESSION STORAGE")
-    print("-"*70)
-    try:
-        session_storage = driver.execute_script("""
-            let items = {};
-            for (let i = 0; i < sessionStorage.length; i++) {
-                let key = sessionStorage.key(i);
-                items[key] = sessionStorage.getItem(key);
-            }
-            return items;
-        """)
-        print(f"Found: {len(session_storage)} items\n")
-        for key in session_storage.keys():
-            print(f"  • {key}")
-    except Exception as e:
-        print(f"Could not access sessionStorage: {e}")
-        session_storage = {}
-    
-    # 4. Check for cookies in document.cookie
-    print("\n" + "="*70)
-    print("4. DOCUMENT.COOKIE (JavaScript accessible cookies)")
-    print("-"*70)
-    try:
-        doc_cookies = driver.execute_script("return document.cookie;")
-        if doc_cookies:
-            doc_cookie_list = [c.strip().split('=')[0] for c in doc_cookies.split(';')]
-            print(f"Found: {len(doc_cookie_list)} cookies\n")
-            for name in doc_cookie_list:
-                print(f"  • {name}")
-        else:
-            print("No JavaScript-accessible cookies found")
-    except Exception as e:
-        print(f"Could not access document.cookie: {e}")
-    
-    # Summary
-    print("\n" + "="*70)
-    print("SUMMARY")
-    print("-"*70)
-    total_items = len(cookies) + len(local_storage) + len(session_storage)
-    print(f"HTTP Cookies: {len(cookies)}")
-    print(f"localStorage items: {len(local_storage)}")
-    print(f"sessionStorage items: {len(session_storage)}")
-    print(f"Total storage items: {total_items}")
-    
-    # Save everything to file
-    all_data = {
-        "http_cookies": cookies,
-        "local_storage": local_storage,
-        "session_storage": session_storage,
-        "total_count": total_items
-    }
-    
-    with open('amazon_all_storage.json', 'w') as f:
-        json.dump(all_data, f, indent=2)
-    
-    print("\n✓ All data saved to amazon_all_storage.json")
-    
-    # Show detailed cookie info
-    print("\n" + "="*70)
-    print("DETAILED COOKIE INFORMATION")
-    print("-"*70)
-    for cookie in cookies:
-        print(f"\n{cookie['name']}:")
-        print(f"  Value: {cookie['value'][:50]}..." if len(cookie['value']) > 50 else f"  Value: {cookie['value']}")
-        print(f"  Domain: {cookie.get('domain')}")
-        print(f"  Secure: {cookie.get('secure')}")
-        print(f"  HttpOnly: {cookie.get('httpOnly')}")
-    
-    time.sleep(3)
-    
-    try:
-        driver.quit()
-    except:
-        pass
-    print("\n✓ Browser closed successfully")
-    
-except Exception as e:
-    print(f"\n❌ Error: {type(e).__name__}")
-    print(f"Details: {str(e)}")
+def _truncate(value: str, max_len: int = 60) -> str:
+    """Truncate a string for console display."""
+    if value is None:
+        return ""
+    if len(value) <= max_len:
+        return value
+    return value[: max_len - 3] + "..."
+
+
+def _mask(value: str, visible: int = 4) -> str:
+    """Mask a value, keeping only the first `visible` characters."""
+    if value is None:
+        return ""
+    if len(value) <= visible:
+        return "*" * len(value)
+    return value[:visible] + "…" + "*" * max(0, len(value) - visible)
+
+
+def _print_summary(result: Dict[str, Any], mask_values: bool = False) -> None:
+    """Print a human-readable summary of the extraction result."""
+    url = result.get("url", "<unknown>")
+    counts = result.get("counts") or {}
+    cookies = result.get("http_cookies") or []
+    local_storage = result.get("local_storage") or {}
+    session_storage = result.get("session_storage") or {}
+
+    print("\n" + "=" * 72)
+    print(f"Extraction summary for: {url}")
+    print("=" * 72)
+    print(
+        f"HTTP cookies     : {counts.get('http_cookies', len(cookies))}\n"
+        f"localStorage keys: {counts.get('local_storage', len(local_storage))}\n"
+        f"sessionStorage   : {counts.get('session_storage', len(session_storage))}\n"
+        f"Total items      : {counts.get('total', 0)}"
+    )
+
+    print("\n" + "=" * 72)
+    print("HTTP COOKIES")
+    print("-" * 72)
+    if not cookies:
+        print("(none)")
+    else:
+        for c in cookies:
+            name = c.get("name", "<no-name>")
+            domain = c.get("domain", "")
+            raw_value = c.get("value", "")
+            value = _mask(raw_value) if mask_values else _truncate(raw_value)
+
+            print(f"\n{name}")
+            print(f"  Domain  : {domain}")
+            print(f"  Value   : {value}")
+            print(f"  Secure  : {c.get('secure')}")
+            print(f"  HttpOnly: {c.get('httpOnly')}")
+
+    print("\n" + "=" * 72)
+    print("LOCAL STORAGE (keys and sample values)")
+    print("-" * 72)
+    if not local_storage:
+        print("(none)")
+    else:
+        for key, raw_value in local_storage.items():
+            value = _mask(str(raw_value)) if mask_values else _truncate(str(raw_value))
+            print(f"\nKey   : {key}")
+            print(f"Value : {value}")
+
+    print("\n" + "=" * 72)
+    print("SESSION STORAGE (keys and sample values)")
+    print("-" * 72)
+    if not session_storage:
+        print("(none)")
+    else:
+        for key, raw_value in session_storage.items():
+            value = _mask(str(raw_value)) if mask_values else _truncate(str(raw_value))
+            print(f"\nKey   : {key}")
+            print(f"Value : {value}")
+
+    print("\n" + "=" * 72)
+    print("NOTE: Values printed here may contain identifiers or session data.")
+    if mask_values:
+        print("      (Console output is masked, but any JSON output file will contain full values.)")
+    else:
+        print("      Use --mask-values for privacy-friendly console output.")
+    print("=" * 72 + "\n")
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        description="Extract cookies, localStorage, and sessionStorage from a web page.",
+    )
+    parser.add_argument(
+        "url",
+        help="URL to analyze (e.g., https://www.amazon.com). "
+             "If missing a scheme, https:// will be prefixed automatically.",
+    )
+    parser.add_argument(
+        "-w",
+        "--wait",
+        type=int,
+        default=8,
+        help="Seconds to wait after page load before extracting (default: 8).",
+    )
+    parser.add_argument(
+        "--no-headless",
+        action="store_true",
+        help="Run Chrome in non-headless mode (browser window will be visible).",
+    )
+    parser.add_argument(
+        "-o",
+        "--output",
+        metavar="FILE",
+        help="Optional JSON file to save full extraction results (raw values).",
+    )
+    parser.add_argument(
+        "--mask-values",
+        action="store_true",
+        help="Mask cookie and storage values in console output (JSON output remains unmasked).",
+    )
+
+    args = parser.parse_args(argv)
+
+    print("=== Cookie & Storage Extraction ===\n")
+    print(f"Target URL   : {args.url}")
+    print(f"Headless     : {not args.no_headless}")
+    print(f"Wait (sec)   : {args.wait}")
+    if args.output:
+        print(f"Output file  : {args.output}")
+    print()
+
+    result = extract_cookies_and_storage(
+        url=args.url,
+        headless=not args.no_headless,
+        wait_time=args.wait,
+    )
+
+    if not result.get("success"):
+        print("❌ Extraction failed.")
+        print(f"   Error type: {result.get('error_type', 'Error')}")
+        print(f"   Message   : {result.get('error', '')}")
+        return 1
+
+    # Optional JSON output
+    if args.output:
+        try:
+            with open(args.output, "w", encoding="utf-8") as f:
+                json.dump(result, f, indent=2, ensure_ascii=False)
+            print(f"✓ Full results saved to: {args.output}")
+        except OSError as e:
+            print(f"⚠ Failed to save JSON output to '{args.output}': {e}")
+
+    # Human-readable summary
+    _print_summary(result, mask_values=args.mask_values)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
