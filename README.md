@@ -68,6 +68,39 @@ Python dependencies are listed in `requirements.txt` and include:
 
        pip install --upgrade pip
        pip install -r requirements.txt
+
+## How to Run
+
+You can run Crookie either from the **command line** or using the **Tkinter GUI**.
+
+---
+
+### Option 1: Command-Line (CLI)
+
+1. Make sure your virtual environment is activated and dependencies are installed (see **Setup**).
+
+2. Run the cookie extractor against a URL:
+
+       python cookie_handler.py https://example.com
+
+3. Follow any prompts in the terminal (if applicable).  
+   When the run completes, check the terminal output for the path to the generated HTML report.
+
+---
+
+### Option 2: Tkinter Desktop GUI
+
+1. With the virtual environment activated, start the GUI:
+
+       python app_gui.py
+
+2. In the window that opens:
+
+   - Enter the target URL.
+   - Adjust any available options (if needed).
+   - Click the button to start the extraction / scan.
+
+3. When it finishes, the GUI will indicate where the HTML report was saved so you can open it in your browser.
      
 ## Project Plan
 
