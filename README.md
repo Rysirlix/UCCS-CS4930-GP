@@ -50,18 +50,24 @@ Python dependencies are listed in `requirements.txt` and include:
 
 ## Setup
 
-- 1) Create and activate a virtual environment
-- python -m venv .venv
+1. **Create and activate a virtual environment**
 
-- Windows
-- .venv\Scripts\activate
+   Run:
 
-- macOS / Linux
-- source .venv/bin/activate
+       python -m venv .venv
 
-- 2) Upgrade pip and install dependencies
-- pip install --upgrade pip
-- pip install -r requirements.txt
+   On **Windows**:
+
+       .venv\Scripts\activate
+
+   On **macOS / Linux**:
+
+       source .venv/bin/activate
+
+2. **Upgrade pip and install dependencies**
+
+       pip install --upgrade pip
+       pip install -r requirements.txt
      
 ## Project Plan
 
