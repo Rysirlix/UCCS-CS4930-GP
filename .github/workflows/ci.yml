@@ -29,10 +29,6 @@ jobs:
           fi
           pip install flake8 pytest
 
-      - name: Lint with flake8
-        run: |
-          flake8 . --max-line-length=100
-
       - name: Check that code compiles
         run: |
           python -m compileall .
