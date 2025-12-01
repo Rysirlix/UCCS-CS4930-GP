@@ -5,6 +5,8 @@ We aim to build a cookie and consent auditor for websites. Users will input a we
 ## Project Structure
 
      UCCS-CS4930-GP/
+     ├── .github/workflows/
+     │   └── ci.yml
      ├── app_gui.py           # Tkinter desktop GUI for running extractions
      ├── cookie_handler.py    # Command-line interface (CLI) wrapper
      ├── extractor.py         # Core logic: browser automation, cookies, storage, analysis
@@ -12,6 +14,7 @@ We aim to build a cookie and consent auditor for websites. Users will input a we
      ├── requirements.txt     # Python dependencies
      ├── templates/
      │   └── cookie_report.html   # HTML template used by report_html.py
+     |   └── cookie_report.css
      └── README.md            # Project overview and usage instructions
      
 ## Project Plan
