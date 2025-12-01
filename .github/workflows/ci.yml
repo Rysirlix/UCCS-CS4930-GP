@@ -27,17 +27,14 @@ jobs:
           if [ -f requirements.txt ]; then
             pip install -r requirements.txt
           fi
-          # basic tooling for linting / tests
           pip install flake8 pytest
 
       - name: Lint with flake8
         run: |
-          # Simple lint pass over the repo
           flake8 . --max-line-length=100
 
       - name: Check that code compiles
         run: |
-          # Make sure all Python files are syntactically valid
           python -m compileall .
 
       - name: Run tests (if tests/ exists)
