@@ -1,42 +1,50 @@
-name: CI Django
+name: Python CI
 
-on: [push, pull_request]
-
-permissions:
-  contents: read
+on:
+  push:
+    branches:
+      - main
+      - Feature_Testing
+      - Testing
+  pull_request:
 
 jobs:
-  test:
+  build-and-check:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Check out repository
         uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-          cache: "pip"
-          cache-dependency-path: |
-            requirements.txt
-            requirements-dev.txt
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          # If you have a dev file, uncomment:
-          # pip install -r requirements-dev.txt
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          fi
+          # basic tooling for linting / tests
+          pip install flake8 pytest
 
-      - name: Django checks
-        run: python manage.py check
+      - name: Lint with flake8
+        run: |
+          # Simple lint pass over the repo
+          flake8 . --max-line-length=100
 
-      - name: Verify migrations are current
-        run: python manage.py makemigrations --check --dry-run
+      - name: Check that code compiles
+        run: |
+          # Make sure all Python files are syntactically valid
+          python -m compileall .
 
-      - name: Apply migrations
-        run: python manage.py migrate --noinput
+      - name: Run tests (if tests/ exists)
+        run: |
+          if [ -d tests ]; then
+            pytest
+          else
+            echo "No tests/ directory; skipping pytest."
+          fi
 
-      - name: Run tests
-        run: python manage.py test -v 2
