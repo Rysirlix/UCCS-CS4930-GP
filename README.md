@@ -2,9 +2,10 @@
 
 We aim to build a cookie and consent auditor for websites. Users will input a website URL, and the application/tool will scan the site to identify cookies, track their duration, and determine which ones may serve tracking or advertising purposes. The tool will generate a report (HTML, PDF, or CSV) that lists cookies, provides metadata, and assigns a basic privacy score.
 
-## Project Structure
-
 ```text
+## Project Structure
+```text
+
 UCCS-CS4930-GP/
 ├── app_gui.py           # Tkinter desktop GUI for running extractions
 ├── cookie_handler.py    # Command-line interface (CLI) wrapper
