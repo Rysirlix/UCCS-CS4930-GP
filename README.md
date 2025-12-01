@@ -1,6 +1,37 @@
 # Crookie
 
-We aim to build a cookie and consent auditor for websites. Users will input a website URL, and the application/tool will scan the site to identify cookies, track their duration, and determine which ones may serve tracking or advertising purposes. The tool will generate a report (HTML, PDF, or CSV) that lists cookies, provides metadata, and assigns a basic privacy score.
+This project launches a real browser, visits a URL, and collects:
+
+- HTTP cookies  
+- `localStorage` keys  
+- `sessionStorage` keys  
+
+It then applies simple heuristics to:
+
+- Classify cookies (essential, analytics, advertising, preferences, security, unknown)  
+- Flag risk hints (long-lived, non-secure on HTTPS, JavaScript-readable)  
+- Compute an overall **privacy score** for the site  
+- Optionally **simulate cookie consent** and compare pre- vs post-consent cookies  
+- Generate a **HTML report** you can open in a browser  
+
+You can run it either from the **command line** or via a **Tkinter desktop GUI**.
+
+---
+
+## Requirements
+
+- Python 3.11 (or 3.10+ should work)
+- Google Chrome or Chromium installed
+- `pip` available
+
+Python dependencies are listed in `requirements.txt` and include:
+
+- `undetected-chromedriver`
+- `selenium`
+- `tk`
+- plus standard libraries used by the project
+
+---
 
 ## Project Structure
 
@@ -16,6 +47,60 @@ We aim to build a cookie and consent auditor for websites. Users will input a we
      │   └── cookie_report.html   # HTML template used by report_html.py
      |   └── cookie_report.css    # css template used by report_html.py
      └── README.md            # Project overview and usage instructions
+
+## Setup
+
+1. **Create and activate a virtual environment**
+
+   Run:
+
+       python -m venv .venv
+
+   On **Windows**:
+
+       .venv\Scripts\activate
+
+   On **macOS / Linux**:
+
+       source .venv/bin/activate
+
+2. **Upgrade pip and install dependencies**
+
+       pip install --upgrade pip
+       pip install -r requirements.txt
+
+## How to Run
+
+You can run Crookie either from the **command line** or using the **Tkinter GUI**.
+
+---
+
+### Option 1: Command-Line (CLI)
+
+1. Make sure your virtual environment is activated and dependencies are installed (see **Setup**).
+
+2. Run the cookie extractor against a URL:
+
+       python cookie_handler.py https://example.com
+
+3. Follow any prompts in the terminal (if applicable).  
+   When the run completes, check the terminal output for the path to the generated HTML report.
+
+---
+
+### Option 2: Tkinter Desktop GUI
+
+1. With the virtual environment activated, start the GUI:
+
+       python app_gui.py
+
+2. In the window that opens:
+
+   - Enter the target URL.
+   - Adjust any available options (if needed).
+   - Click the button to start the extraction / scan.
+
+3. When it finishes, the GUI will indicate where the HTML report was saved so you can open it in your browser.
      
 ## Project Plan
 
@@ -96,3 +181,4 @@ If time permits, we may add extended features such as:
 - `Brainstorming session File`
 - `Research File`
 - `Marketing assets File`
+

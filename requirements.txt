@@ -1,1 +1,2 @@
 undetected-chromedriver>=3.3.6
+selenium>=4.0.0
