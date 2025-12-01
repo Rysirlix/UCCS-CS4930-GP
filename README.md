@@ -4,6 +4,7 @@ We aim to build a cookie and consent auditor for websites. Users will input a we
 
 ## Project Structure
 
+```text
 UCCS-CS4930-GP/
 ├── app_gui.py           # Tkinter desktop GUI for running extractions
 ├── cookie_handler.py    # Command-line interface (CLI) wrapper
