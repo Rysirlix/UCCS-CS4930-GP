@@ -9,6 +9,7 @@ import re
 from urllib.parse import urlparse
 
 from extractor import extract_cookies_and_storage
+from report_html import generate_html_report
 
 
 def _sanitize_filename(name: str) -> str:
@@ -65,6 +66,9 @@ class CookieExtractorApp(tk.Tk):
         self.headless_var = tk.BooleanVar(value=True)
         ttk.Checkbutton(top, text="Headless", variable=self.headless_var).pack(side=tk.LEFT, padx=(0, 8))
 
+        self.consent_var = tk.BooleanVar(value=False)
+        ttk.Checkbutton(top, text="Try consent click", variable=self.consent_var).pack(side=tk.LEFT, padx=(0, 8))
+
         ttk.Label(top, text="Wait (s)").pack(side=tk.LEFT)
         self.wait_var = tk.StringVar(value="8")
         ttk.Entry(top, textvariable=self.wait_var, width=4).pack(side=tk.LEFT, padx=(4, 12))
@@ -74,6 +78,9 @@ class CookieExtractorApp(tk.Tk):
 
         self.save_btn = ttk.Button(top, text="Save As...", command=self.save_as, state=tk.DISABLED)
         self.save_btn.pack(side=tk.LEFT, padx=(8, 0))
+
+        self.html_btn = ttk.Button(top, text="Export HTML report...", command=self.export_html_report, state=tk.DISABLED)
+        self.html_btn.pack(side=tk.LEFT, padx=(8, 0))
 
         # Counts summary under top
         counts_frame = ttk.Frame(frm, padding=(0, 4))
@@ -144,6 +151,7 @@ class CookieExtractorApp(tk.Tk):
             return
 
         headless = self.headless_var.get()
+        try_consent = self.consent_var.get()
 
         # Clear previous lists/log/state BEFORE logging new run
         self.cookies_list.delete(0, tk.END)
@@ -156,24 +164,25 @@ class CookieExtractorApp(tk.Tk):
         self.cookies_data = []
         self.cookie_analysis = []
         self.save_btn.config(state=tk.DISABLED)
+        self.html_btn.config(state=tk.DISABLED)
 
         self.status_var.set("Starting extraction...")
-        self.log(f"Starting extraction for: {url} (headless={headless}, wait={wait_time}s)")
+        self.log(f"Starting extraction for: {url} (headless={headless}, wait={wait_time}s, try_consent={try_consent})")
 
         self.start_btn.config(state=tk.DISABLED)
 
         self.worker_thread = threading.Thread(
             target=self._worker,
-            args=(url, headless, wait_time),
+            args=(url, headless, wait_time, try_consent),
             daemon=True,
         )
         self.worker_thread.start()
         self.after(200, self._poll_queue)
 
-    def _worker(self, url: str, headless: bool, wait_time: int):
-        self.result_queue.put(("log", f"Worker: launching browser (headless={headless})..."))
+    def _worker(self, url: str, headless: bool, wait_time: int, try_consent: bool):
+        self.result_queue.put(("log", f"Worker: launching browser (headless={headless}, try_consent={try_consent})..."))
         # include_analysis=True by default in extractor; GUI just uses whatever it gets
-        res = extract_cookies_and_storage(url, headless=headless, wait_time=wait_time)
+        res = extract_cookies_and_storage(url, headless=headless, wait_time=wait_time, try_consent=try_consent,)
         self.result_queue.put(("result", res))
 
     def _poll_queue(self):
@@ -194,6 +203,7 @@ class CookieExtractorApp(tk.Tk):
             self.start_btn.config(state=tk.NORMAL)
             if self.current_result and self.current_result.get("success"):
                 self.save_btn.config(state=tk.NORMAL)
+                self.html_btn.config(state=tk.NORMAL)
                 if self.status_var.get() == "Starting extraction...":
                     self.status_var.set("Finished successfully")
             else:
@@ -224,7 +234,29 @@ class CookieExtractorApp(tk.Tk):
             f"Total: {counts.get('total', 0)}"
         )
 
-        self.cookies_data = res.get("http_cookies", []) or []
+        analysis = self.current_result.get("analysis", {})
+        pre = (analysis.get("pre_consent", {})).get("totals", {})
+        post = (analysis.get("post_consent", {})).get("totals", {})
+        consent_info = analysis.get("consent_action", {})
+
+        if pre and post:
+            self.log(
+                "Pre/post-consent cookie totals = "
+                f"pre: {pre.get('count', 0)} (third-party: {pre.get('third_party', 0)}), "
+                f"post: {post.get('count', 0)} (third-party: {post.get('third_party', 0)})"
+            )
+
+        if consent_info.get("attempted"):
+            self.log(
+                "Consent gathering attempted: "
+                f"clicked={consent_info.get('clicked')}, "
+                f"css={consent_info.get('clicked_css')}, "
+                f"xpath={consent_info.get('clicked_xpath')}"
+            )
+        else:
+            self.log("Consent gathering not attempted.")
+
+        self.cookies_data = res.get("http_cookies", [])
 
         # Pull per-cookie analysis if available and align by index
         self.cookie_analysis = []
@@ -310,6 +342,33 @@ class CookieExtractorApp(tk.Tk):
         except OSError as e:
             messagebox.showerror("Save failed", f"Could not save file:\n{e}")
             self.log(f"Save failed for '{filename}': {e}")
+
+    def export_html_report(self):
+        if not self.current_result or not self.current_result.get("success"):
+            messagebox.showwarning("Nothing to export", "There is no successful extraction to export yet.")
+            return
+
+        url = self.current_result.get("url") or self.url_var.get()
+        parsed = urlparse(url)
+        domain = _sanitize_filename(parsed.netloc or "site")
+        default_name = f"{domain}_report.html"
+
+        filename = filedialog.asksaveasfilename(
+            title="Export HTML privacy report as...",
+            defaultextension=".html",
+            initialfile=default_name,
+            filetypes=[("HTML files", "*.html"), ("All files", "*.*")],
+        )
+        if not filename:
+            return
+
+        try:
+            generate_html_report(self.current_result, filename)
+            self.log(f"HTML report exported to '{filename}'.")
+        except OSError as e:
+            messagebox.showerror("Export failed", f"Could not save HTML report:\n{e}")
+            self.log(f"Export failed for '{filename}': {e}")
+
 
     def on_cookie_double_click(self, event=None):
         selection = self.cookies_list.curselection()

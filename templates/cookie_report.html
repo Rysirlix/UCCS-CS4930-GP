@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>{TITLE}</title>
+    <link rel="stylesheet" href="cookie_report.css" />
+
+</head>
+<body>
+    <h1>Cookie & Storage Report</h1>
+    <p>
+        <strong>URL:</strong> {URL}<br />
+        <strong>Site Domain:</strong> {SITE_DOMAIN}<br />
+        <strong>HTTPS:</strong> {IS_HTTPS}<br />
+        <strong>Created:</strong> {TIMESTAMP}
+    </p>
+
+    <h2>Privacy Rating</h2>
+    <div class="summary">
+        <p>Overall privacy rating: {SCORE_BLOCK}</p>
+        <h3>Score details </h3>
+        {REASONS_HTML}
+    </div>
+
+    <h2>Cookie Consent & Changes</h2>
+    <div class="summary">
+        {CONSENT_HTML}
+    </div>
+
+    <h2>Totals & Categories</h2>
+    <h3>Totals</h3>
+    {TOTALS_HTML}
+
+    <h3>Categories</h3>
+    {CATEGORIES_LIST}
+
+    <h2>Cookie details</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Domain</th>
+                <th>Party</th>
+                <th>Category</th>
+                <th>Lifetime</th>
+                <th>Security flags</th>
+                <th>Risk hints</th>
+                <th>Summary</th>
+            </tr>
+        </thead>
+        <tbody>
+            {ROWS_HTML}
+        </tbody>
+    </table>
+
+</body>
+</html>
+

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Core cookie and web storage extraction + basic privacy analysis.
 """
 
@@ -8,6 +8,9 @@ import json
 import time
 from typing import Any, Dict, List, Optional
 from urllib.parse import urlparse
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 import undetected_chromedriver as uc
 
@@ -92,6 +95,126 @@ CATEGORY_DESCRIPTIONS = {
     "unknown": "The exact purpose is not clear from the name alone.",
 }
 
+def _try_click_consent(driver, timeout=6):
+    tried = []
+    clicked = False
+    clicked_selector = None
+    clicked_xpath = None
+    error = None
+
+    start = time.time()
+    deadline = start + max(timeout, 1)
+
+    text_patterns = [
+        "accept all cookies",
+        "accept all",
+        "accept",
+        "i agree",
+        "i accept",
+        "agree",
+        "allow all",
+        "allow cookies",
+        "ok",
+        "got it",
+    ]
+
+    xpaths = []
+
+    for t in text_patterns:
+        xpaths.append(
+            (
+                f"//button[contains(translate(normalize-space(.),"
+                f" 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '{t}')]"
+            )
+        )
+        xpaths.append(
+            (
+                f"//a[contains(translate(normalize-space(.),"
+                f" 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '{t}')]"
+            )
+        )
+
+    def find_click_target_in_context(context):
+        for xp in xpaths:
+            tried.append(f"{context}:xpath:{xp}")
+            try:
+                elems = driver.find_elements(By.XPATH, xp)
+            except Exception:
+                continue
+
+            for i in elems:
+                try:
+                    if i.is_displayed() and i.is_enabled():
+                        return i, xp
+                except Exception:
+                    continue
+        return None
+
+    try:
+        while time.time() < deadline and not clicked:
+            try:
+                driver.switch_to.default_content()
+            except Exception:
+                pass
+
+            if time.time() >= deadline:
+                break
+
+            target = find_click_target_in_context("main")
+            if target is not None:
+                i, xp = target
+                try:
+                    i.click()
+                    clicked = True
+                    clicked_xpath = xp
+                    break
+                except Exception:
+                    pass
+
+            try:
+                iframes = driver.find_elements(By.TAG_NAME, "iframe")
+            except Exception:
+                iframes = []
+
+            for idx, frame in enumerate(iframes):
+                if time.time() >= deadline or clicked:
+                    break
+                try:
+                    driver.switch_to.default_content()
+                    driver.switch_to.frame(frame)
+                except Exception:
+                    continue
+
+                target = find_click_target_in_context(f"iframe[{idx}]")
+                if target is not None:
+                    i, xp = target
+                    try:
+                        i.click()
+                        clicked = True
+                        clicked_xpath = xp
+                        break
+                    except Exception:
+                        continue
+
+            if not clicked:
+                time.sleep(0.5)
+
+        try:
+            driver.switch_to.default_content()
+        except Exception:
+            pass
+
+    except Exception as e:
+        error = str(e)
+
+    return {
+        "attempted": True,
+        "clicked": clicked,
+        "clicked_css": clicked_selector,
+        "clicked_xpath": clicked_xpath,
+        "methods_tried": tried,
+        "error": error,
+    }
 
 def _classify_cookie(
     cookie: Dict[str, Any],
@@ -271,6 +394,76 @@ def _cookie_human_summary(
         f"{lifetime} {security_sentence} {risk_sentence}"
     ).strip()
 
+def _compute_privacy_score(totals, categories_count):
+    score = 100
+    reasons = []
+
+    third_party = totals.get("third_party", 0)
+    long_lived = totals.get("long_lived", 0)
+    non_secure = totals.get("non_secure_on_https", 0)
+    js_readable = totals.get("javascript_accessible", 0)
+    advertising = categories_count.get("advertising", 0)
+
+    if third_party > 0:
+        penalty = min(30, 3 * third_party)
+        score -= penalty
+        reasons.append(
+            f"{third_party} cookie/s are third-party"
+            f"(−{penalty} points)."
+        )
+
+    if long_lived > 0:
+        penalty = min(24, 4 * long_lived)
+        score -= penalty
+        reasons.append(
+            f"{long_lived} cookie/s last longer than 6 months"
+            f"(−{penalty} points)."
+        )
+
+    if non_secure > 0:
+        penalty = min(25, 5 * non_secure)
+        score -= penalty
+        reasons.append(
+            f"{non_secure} cookie/s not marked 'Secure' even though site uses HTTPS"
+            f"(−{penalty} points)."
+        )
+
+    if js_readable > 0:
+        penalty = min(10, 1 * js_readable)
+        score -= penalty
+        reasons.append(
+            f"{js_readable} cookie/s can be read by JavaScript"
+            f"(−{penalty} points)."
+        )
+
+    if advertising > 0:
+        score -= 10
+        reasons.append("cookie/s categorized as advertising (−10 points).")
+
+    if score < 0:
+        score = 0
+    if score > 100:
+        score = 100
+    if score >= 90:
+        grade = "A"
+    elif score >= 80:
+        grade = "B"
+    elif score >= 70:
+        grade = "C"
+    elif score >= 60:
+        grade = "D"
+    else:
+        grade = "F"
+
+    if not reasons:
+        reasons.append("No cookie-related risk factors detected.")
+
+    return {
+        "privacy_score": score,
+        "max_score": 100,
+        "grade": grade,
+        "reasons": reasons,
+    }
 
 def _analyze_cookies(
     cookies: List[Dict[str, Any]],
@@ -338,11 +531,14 @@ def _analyze_cookies(
             "summary": summary,
         })
 
+    score_block = _compute_privacy_score(totals, categories_count)
+
     return {
         "site_domain": site_domain,
         "is_https": is_https,
         "totals": totals,
         "categories": categories_count,
+        "score": score_block,
         "cookies": per_cookie,
     }
 
@@ -355,6 +551,7 @@ def extract_cookies_and_storage(
     headless: bool = True,
     wait_time: int = 8,
     include_analysis: bool = True,
+    try_consent: bool = False,
 ) -> Dict[str, Any]:
     """
     Navigate to a URL using undetected-chromedriver and extract:
@@ -392,7 +589,34 @@ def extract_cookies_and_storage(
         time.sleep(max(1, int(wait_time)))
 
         final_url = driver.current_url or url
-        http_cookies = driver.get_cookies() or []
+
+        pre_cookies = driver.get_cookies() or []
+
+        consent_info = {
+            "attempted": False,
+            "clicked": False,
+            "clicked_css": None,
+            "clicked_xpath": None,
+            "methods_tried": [],
+            "error": None,
+        }
+
+        if try_consent:
+            try:
+                driver.execute_script(
+                    "window.scrollTo(0, document.body.scrollHeight / 3);"
+                )
+            except Exception:
+                pass
+
+            consent_info = _try_click_consent(driver)
+            time.sleep(3)
+
+        post_cookies = driver.get_cookies() or []
+        if not post_cookies:
+            post_cookies = pre_cookies
+
+        http_cookies = post_cookies
 
         # localStorage
         try:
@@ -447,8 +671,14 @@ def extract_cookies_and_storage(
         }
 
         if include_analysis:
+            pre_analysis = _analyze_cookies(pre_cookies, final_url)
+            post_analysis = _analyze_cookies(http_cookies, final_url)
+
             result["analysis"] = {
                 "cookies": _analyze_cookies(http_cookies, final_url),
+                "pre_consent": pre_analysis,
+                "post_consent": post_analysis,
+                "consent_action": consent_info,
                 # In the future you could also add storage-specific analysis here.
             }
 

@@ -29,7 +29,7 @@ import sys
 from typing import Any, Dict
 
 from extractor import extract_cookies_and_storage
-
+from report_html import generate_html_report
 
 def _truncate(value: str, max_len: int = 60) -> str:
     """Truncate a string for console display."""
@@ -144,9 +144,19 @@ def main(argv: list[str] | None = None) -> int:
         help="Optional JSON file to save full extraction results (raw values).",
     )
     parser.add_argument(
+        "--html-report",
+        metavar="FILE",
+        help="Optional HTML file to save a human-readable privacy report.",
+    )
+    parser.add_argument(
         "--mask-values",
         action="store_true",
         help="Mask cookie and storage values in console output (JSON output remains unmasked).",
+    )
+    parser.add_argument(
+        "--try-consent",
+        action="store_true",
+        help="Attempt to click a generic 'Accept cookies' button and collect post-consent cookies.",
     )
 
     args = parser.parse_args(argv)
@@ -155,14 +165,18 @@ def main(argv: list[str] | None = None) -> int:
     print(f"Target URL   : {args.url}")
     print(f"Headless     : {not args.no_headless}")
     print(f"Wait (sec)   : {args.wait}")
+    print(f"Try consent  : {args.try_consent}")
     if args.output:
         print(f"Output file  : {args.output}")
+    if args.html_report:
+        print(f"HTML report  : {args.html_report}")
     print()
 
     result = extract_cookies_and_storage(
         url=args.url,
         headless=not args.no_headless,
         wait_time=args.wait,
+        try_consent=args.try_consent,
     )
 
     if not result.get("success"):
@@ -180,8 +194,39 @@ def main(argv: list[str] | None = None) -> int:
         except OSError as e:
             print(f"⚠ Failed to save JSON output to '{args.output}': {e}")
 
+    # Optional HTML report
+    if args.html_report:
+        try:
+            generate_html_report(result, args.html_report)
+            print(f"HTML report saved to: {args.html_report}")
+        except OSError as e:
+            print(f"Failed to save HTML report to '{args.html_report}': {e}")
+
     # Human-readable summary
     _print_summary(result, mask_values=args.mask_values)
+
+    analysis = result.get("analysis", {})
+    pre_analysis = analysis.get("pre_consent", {})
+    post_analysis = analysis.get("post_consent", {})
+    consent_info = analysis.get("consent_action", {})
+
+    pre = pre_analysis.get("totals", {})
+    post = post_analysis.get("totals", {})
+
+    if pre or post:
+        print("Pre-consent cookies:",
+            pre.get("count", 0),
+            "Third-party:", pre.get("third_party", 0))
+        print("Post-consent cookies:",
+            post.get("count", 0),
+            "Third-party:", post.get("third_party", 0))
+
+    if consent_info.get("attempted"):
+        print("\nConsent simulation:")
+        print(f" Clicked : {consent_info.get('clicked')}")
+    else:
+        print("\nConsent: Not Selected.")
+
     return 0
 
 
