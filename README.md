@@ -1,10 +1,22 @@
-# Kickoff
+# Crookie
 
 We aim to build a cookie and consent auditor for websites. Users will input a website URL, and the application/tool will scan the site to identify cookies, track their duration, and determine which ones may serve tracking or advertising purposes. The tool will generate a report (HTML, PDF, or CSV) that lists cookies, provides metadata, and assigns a basic privacy score.
 
 ## Project Structure
 
-
+     UCCS-CS4930-GP/
+     ├── .github/workflows/
+     │   └── ci.yml
+     ├── app_gui.py           # Tkinter desktop GUI for running extractions
+     ├── cookie_handler.py    # Command-line interface (CLI) wrapper
+     ├── extractor.py         # Core logic: browser automation, cookies, storage, analysis
+     ├── report_html.py       # Generates HTML privacy report from extraction results
+     ├── requirements.txt     # Python dependencies
+     ├── templates/
+     │   └── cookie_report.html   # HTML template used by report_html.py
+     |   └── cookie_report.css    # css template used by report_html.py
+     └── README.md            # Project overview and usage instructions
+     
 ## Project Plan
 
 - **Task List**:
@@ -84,3 +96,4 @@ If time permits, we may add extended features such as:
 - `Brainstorming session File`
 - `Research File`
 - `Marketing assets File`
+
