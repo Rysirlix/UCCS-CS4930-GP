@@ -14,7 +14,7 @@ We aim to build a cookie and consent auditor for websites. Users will input a we
      ├── requirements.txt     # Python dependencies
      ├── templates/
      │   └── cookie_report.html   # HTML template used by report_html.py
-     |   └── cookie_report.css
+     |   └── cookie_report.css    # css template used by report_html.py
      └── README.md            # Project overview and usage instructions
      
 ## Project Plan
